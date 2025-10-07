@@ -1,12 +1,14 @@
 import {
-  Blockhash,
+  type Blockhash,
+  type KeyPairSigner,
+  type Instruction,
+  type Address,
   createSolanaClient,
   createTransaction,
-  Instruction,
-  KeyPairSigner,
   signTransactionMessageWithSigners,
+  getProgramDerivedAddress,
 } from 'gill'
-import { getInitializePollInstruction } from '../src'
+import { getInitializePollInstruction, SolanavoteappIDL, fetchPoll } from '../src'
 // @ts-ignore error TS2307 suggest setting `moduleResolution` but this is already configured
 import { loadKeypairSignerFromFile } from 'gill/node'
 import { describe, beforeAll, expect, it } from 'vitest'
@@ -15,13 +17,34 @@ const { rpc, sendAndConfirmTransaction } = createSolanaClient({ urlOrMoniker: "l
 
 describe('solanavoteapp', () => {
   let payer: KeyPairSigner
+  const poll_id = BigInt(1);
+  let pollPDA: Address
 
   beforeAll(async () => {
     payer = await loadKeypairSignerFromFile(process.env.ANCHOR_WALLET!)
+
+    const [PDA] = await getProgramDerivedAddress({
+      programAddress: SolanavoteappIDL.address as Address,
+      seeds: [Buffer.from(poll_id.toString())]
+    })
+    pollPDA = PDA
   })
 
-  it('should run the program and print "GM!" to the transaction log', async () => {
 
+  it('Initialize Poll', async () => {
+    const ix = getInitializePollInstruction({
+      pollId: BigInt(poll_id),
+      pollStart: BigInt(Math.floor(Date.now() / 1000)), // current time in seconds
+      pollEnd: BigInt(Math.floor(Date.now() / 1000) + 3600), // current time + 1 hour
+      description: "This is a sample poll",
+      signer: payer,
+      poll: pollPDA,
+    })
+
+    await sendAndConfirm({ ix, payer })
+
+    const pollAccount = await fetchPoll(rpc, pollPDA);
+    expect(pollAccount.data.candidateCount).toEqual(0);
   })
 })
 

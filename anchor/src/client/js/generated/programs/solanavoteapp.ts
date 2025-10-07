@@ -13,12 +13,17 @@ import {
   type Address,
   type ReadonlyUint8Array,
 } from 'gill';
-import { type ParsedInitializePollInstruction } from '../instructions';
+import {
+  type ParsedCastVoteInstruction,
+  type ParsedInitializeCandidateInstruction,
+  type ParsedInitializePollInstruction,
+} from '../instructions';
 
 export const SOLANAVOTEAPP_PROGRAM_ADDRESS =
   'JAVuBXeBZqXNtS73azhBDAoYaaAFfo4gWXoZe2e7Jf8H' as Address<'JAVuBXeBZqXNtS73azhBDAoYaaAFfo4gWXoZe2e7Jf8H'>;
 
 export enum SolanavoteappAccount {
+  Candidate,
   Poll,
 }
 
@@ -26,6 +31,17 @@ export function identifySolanavoteappAccount(
   account: { data: ReadonlyUint8Array } | ReadonlyUint8Array
 ): SolanavoteappAccount {
   const data = 'data' in account ? account.data : account;
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([86, 69, 250, 96, 193, 10, 222, 123])
+      ),
+      0
+    )
+  ) {
+    return SolanavoteappAccount.Candidate;
+  }
   if (
     containsBytes(
       data,
@@ -43,6 +59,8 @@ export function identifySolanavoteappAccount(
 }
 
 export enum SolanavoteappInstruction {
+  CastVote,
+  InitializeCandidate,
   InitializePoll,
 }
 
@@ -53,8 +71,30 @@ export function identifySolanavoteappInstruction(
   if (
     containsBytes(
       data,
-      fixEncoderSize(getBytesEncoder(), 9).encode(
-        new Uint8Array([193, 22, 99, 197, 197, 18, 33, 115, 117])
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([20, 212, 15, 189, 69, 180, 69, 151])
+      ),
+      0
+    )
+  ) {
+    return SolanavoteappInstruction.CastVote;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([210, 107, 118, 204, 255, 97, 112, 26])
+      ),
+      0
+    )
+  ) {
+    return SolanavoteappInstruction.InitializeCandidate;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([193, 22, 99, 197, 18, 33, 115, 117])
       ),
       0
     )
@@ -68,6 +108,13 @@ export function identifySolanavoteappInstruction(
 
 export type ParsedSolanavoteappInstruction<
   TProgram extends string = 'JAVuBXeBZqXNtS73azhBDAoYaaAFfo4gWXoZe2e7Jf8H',
-> = {
-  instructionType: SolanavoteappInstruction.InitializePoll;
-} & ParsedInitializePollInstruction<TProgram>;
+> =
+  | ({
+      instructionType: SolanavoteappInstruction.CastVote;
+    } & ParsedCastVoteInstruction<TProgram>)
+  | ({
+      instructionType: SolanavoteappInstruction.InitializeCandidate;
+    } & ParsedInitializeCandidateInstruction<TProgram>)
+  | ({
+      instructionType: SolanavoteappInstruction.InitializePoll;
+    } & ParsedInitializePollInstruction<TProgram>);

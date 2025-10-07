@@ -6,4 +6,6 @@
  * @see https://github.com/codama-idl/codama
  */
 
+export * from './castVote';
+export * from './initializeCandidate';
 export * from './initializePoll';
