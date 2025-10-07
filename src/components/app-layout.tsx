@@ -6,7 +6,6 @@ import { AccountUiChecker } from '@/features/account/ui/account-ui-checker'
 import { ThemeProvider } from './theme-provider'
 import { Toaster } from './ui/sonner'
 import { AppHeader } from './app-header'
-import { AppFooter } from './app-footer'
 
 export function AppLayout({
   children,
@@ -25,7 +24,6 @@ export function AppLayout({
           </ClusterUiChecker>
           {children}
         </main>
-        <AppFooter />
       </div>
       <Toaster closeButton />
     </ThemeProvider>

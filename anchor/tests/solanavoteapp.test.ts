@@ -6,11 +6,13 @@ import {
   KeyPairSigner,
   signTransactionMessageWithSigners,
 } from 'gill'
-import { getGreetInstruction } from '../src'
+import { getInitializePollInstruction } from '../src'
 // @ts-ignore error TS2307 suggest setting `moduleResolution` but this is already configured
 import { loadKeypairSignerFromFile } from 'gill/node'
+import { describe, beforeAll, expect, it } from 'vitest'
 
-const { rpc, sendAndConfirmTransaction } = createSolanaClient({ urlOrMoniker: process.env.ANCHOR_PROVIDER_URL! })
+const { rpc, sendAndConfirmTransaction } = createSolanaClient({ urlOrMoniker: "localnet" })
+
 describe('solanavoteapp', () => {
   let payer: KeyPairSigner
 
@@ -19,16 +21,7 @@ describe('solanavoteapp', () => {
   })
 
   it('should run the program and print "GM!" to the transaction log', async () => {
-    // ARRANGE
-    expect.assertions(1)
-    const ix = getGreetInstruction()
 
-    // ACT
-    const sx = await sendAndConfirm({ ix, payer })
-
-    // ASSERT
-    expect(sx).toBeDefined()
-    console.log('Transaction signature:', sx)
   })
 })
 

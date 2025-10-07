@@ -104,6 +104,7 @@ out
 .nuxt
 dist
 .output
+.anchor/
 
 # Gatsby files
 .cache/
