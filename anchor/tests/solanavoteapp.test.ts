@@ -7,8 +7,9 @@ import {
   createTransaction,
   signTransactionMessageWithSigners,
   getProgramDerivedAddress,
+  getU64Encoder,
 } from 'gill'
-import { getInitializePollInstruction, SolanavoteappIDL, fetchPoll } from '../src'
+import { getInitializePollInstructionAsync, SolanavoteappIDL, fetchPoll } from '../src'
 // @ts-ignore error TS2307 suggest setting `moduleResolution` but this is already configured
 import { loadKeypairSignerFromFile } from 'gill/node'
 import { describe, beforeAll, expect, it } from 'vitest'
@@ -25,26 +26,25 @@ describe('solanavoteapp', () => {
 
     const [PDA] = await getProgramDerivedAddress({
       programAddress: SolanavoteappIDL.address as Address,
-      seeds: [Buffer.from(poll_id.toString())]
+      seeds: [getU64Encoder().encode(poll_id)]
     })
     pollPDA = PDA
   })
 
 
   it('Initialize Poll', async () => {
-    const ix = getInitializePollInstruction({
-      pollId: BigInt(poll_id),
+    const ix = await getInitializePollInstructionAsync({
+      pollId: poll_id,
       pollStart: BigInt(Math.floor(Date.now() / 1000)), // current time in seconds
       pollEnd: BigInt(Math.floor(Date.now() / 1000) + 3600), // current time + 1 hour
       description: "This is a sample poll",
       signer: payer,
-      poll: pollPDA,
     })
-
+    
     await sendAndConfirm({ ix, payer })
 
     const pollAccount = await fetchPoll(rpc, pollPDA);
-    expect(pollAccount.data.candidateCount).toEqual(0);
+    expect(pollAccount.data.candidateCount).toEqual(0n);
   })
 })
 

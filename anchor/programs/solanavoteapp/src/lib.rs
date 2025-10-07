@@ -8,8 +8,8 @@ pub mod solanavoteapp {
 
     pub fn initialize_poll(
         ctx: Context<InitializePoll>,
-        description: String,
         poll_id: u64,
+        description: String,
         poll_start: u64,
         poll_end: u64,
     ) -> Result<()> {

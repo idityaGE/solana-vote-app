@@ -84,15 +84,15 @@ export type InitializePollInstruction<
 
 export type InitializePollInstructionData = {
   discriminator: ReadonlyUint8Array;
-  description: string;
   pollId: bigint;
+  description: string;
   pollStart: bigint;
   pollEnd: bigint;
 };
 
 export type InitializePollInstructionDataArgs = {
-  description: string;
   pollId: number | bigint;
+  description: string;
   pollStart: number | bigint;
   pollEnd: number | bigint;
 };
@@ -101,8 +101,8 @@ export function getInitializePollInstructionDataEncoder(): Encoder<InitializePol
   return transformEncoder(
     getStructEncoder([
       ['discriminator', fixEncoderSize(getBytesEncoder(), 8)],
-      ['description', addEncoderSizePrefix(getUtf8Encoder(), getU32Encoder())],
       ['pollId', getU64Encoder()],
+      ['description', addEncoderSizePrefix(getUtf8Encoder(), getU32Encoder())],
       ['pollStart', getU64Encoder()],
       ['pollEnd', getU64Encoder()],
     ]),
@@ -113,8 +113,8 @@ export function getInitializePollInstructionDataEncoder(): Encoder<InitializePol
 export function getInitializePollInstructionDataDecoder(): Decoder<InitializePollInstructionData> {
   return getStructDecoder([
     ['discriminator', fixDecoderSize(getBytesDecoder(), 8)],
-    ['description', addDecoderSizePrefix(getUtf8Decoder(), getU32Decoder())],
     ['pollId', getU64Decoder()],
+    ['description', addDecoderSizePrefix(getUtf8Decoder(), getU32Decoder())],
     ['pollStart', getU64Decoder()],
     ['pollEnd', getU64Decoder()],
   ]);
@@ -138,8 +138,8 @@ export type InitializePollAsyncInput<
   signer: TransactionSigner<TAccountSigner>;
   poll?: Address<TAccountPoll>;
   systemProgram?: Address<TAccountSystemProgram>;
-  description: InitializePollInstructionDataArgs['description'];
   pollId: InitializePollInstructionDataArgs['pollId'];
+  description: InitializePollInstructionDataArgs['description'];
   pollStart: InitializePollInstructionDataArgs['pollStart'];
   pollEnd: InitializePollInstructionDataArgs['pollEnd'];
 };
@@ -221,8 +221,8 @@ export type InitializePollInput<
   signer: TransactionSigner<TAccountSigner>;
   poll: Address<TAccountPoll>;
   systemProgram?: Address<TAccountSystemProgram>;
-  description: InitializePollInstructionDataArgs['description'];
   pollId: InitializePollInstructionDataArgs['pollId'];
+  description: InitializePollInstructionDataArgs['description'];
   pollStart: InitializePollInstructionDataArgs['pollStart'];
   pollEnd: InitializePollInstructionDataArgs['pollEnd'];
 };
