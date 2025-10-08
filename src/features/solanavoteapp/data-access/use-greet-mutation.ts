@@ -1,4 +1,4 @@
-import { SOLANAVOTEAPP_PROGRAM_ADDRESS, getGreetInstruction } from '@project/anchor'
+import { SolanavoteappIDL, getGreetInstruction } from '@project/anchor'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { toastTx } from '@/components/toast-tx'
@@ -11,7 +11,7 @@ export function useGreetMutation({ account }: { account: UiWalletAccount }) {
 
   return useMutation({
     mutationFn: async () => {
-      return await signAndSend(getGreetInstruction({ programAddress: SOLANAVOTEAPP_PROGRAM_ADDRESS }), txSigner)
+      return await signAndSend(getGreetInstruction({ programAddress: SolanavoteappIDL.address }), txSigner)
     },
     onSuccess: (signature) => {
       toastTx(signature)

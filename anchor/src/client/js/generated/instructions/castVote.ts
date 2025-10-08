@@ -34,10 +34,10 @@ import {
   type InstructionWithAccounts,
   type InstructionWithData,
   type ReadonlyAccount,
-  type ReadonlySignerAccount,
   type ReadonlyUint8Array,
   type TransactionSigner,
   type WritableAccount,
+  type WritableSignerAccount,
 } from 'gill';
 import { SOLANAVOTEAPP_PROGRAM_ADDRESS } from '../programs';
 import {
@@ -65,7 +65,7 @@ export type CastVoteInstruction<
   InstructionWithAccounts<
     [
       TAccountVoter extends string
-        ? ReadonlySignerAccount<TAccountVoter> &
+        ? WritableSignerAccount<TAccountVoter> &
             AccountSignerMeta<TAccountVoter>
         : TAccountVoter,
       TAccountPoll extends string
@@ -155,7 +155,7 @@ export async function getCastVoteInstructionAsync<
 
   // Original accounts.
   const originalAccounts = {
-    voter: { value: input.voter ?? null, isWritable: false },
+    voter: { value: input.voter ?? null, isWritable: true },
     poll: { value: input.poll ?? null, isWritable: false },
     candidate: { value: input.candidate ?? null, isWritable: true },
   };
@@ -237,7 +237,7 @@ export function getCastVoteInstruction<
 
   // Original accounts.
   const originalAccounts = {
-    voter: { value: input.voter ?? null, isWritable: false },
+    voter: { value: input.voter ?? null, isWritable: true },
     poll: { value: input.poll ?? null, isWritable: false },
     candidate: { value: input.candidate ?? null, isWritable: true },
   };

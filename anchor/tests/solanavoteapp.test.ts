@@ -10,6 +10,15 @@ import {
   getU64Encoder,
   getUtf8Encoder,
   generateKeyPairSigner,
+  LAMPORTS_PER_SOL,
+  airdropFactory,
+  lamports,
+  SolanaClusterMoniker,
+  compileTransaction,
+  getCompiledTransactionMessageDecoder,
+  signTransaction,
+  transactionFromBase64,
+  transactionToBase64
 } from 'gill'
 import {
   getInitializePollInstructionAsync,
@@ -23,7 +32,8 @@ import {
 import { loadKeypairSignerFromFile } from 'gill/node'
 import { describe, beforeAll, expect, it } from 'vitest'
 
-const { rpc, sendAndConfirmTransaction } = createSolanaClient({ urlOrMoniker: "localnet" })
+const cluster: SolanaClusterMoniker = "localnet";
+const { rpc, sendAndConfirmTransaction, rpcSubscriptions } = createSolanaClient({ urlOrMoniker: cluster })
 
 describe('solanavoteapp', () => {
   let payer: KeyPairSigner
@@ -113,16 +123,43 @@ describe('solanavoteapp', () => {
   it("Let's Cast Vote", async () => {
     const voter = await generateKeyPairSigner();
 
+    // Airdorp Doesn't support on Localnet in gill
+    await airdropFactory({rpc, rpcSubscriptions})({
+      commitment: "confirmed",
+      lamports: lamports(BigInt(LAMPORTS_PER_SOL)),
+      recipientAddress: voter.address
+    })
+
     const ix = getCastVoteInstruction({
       candidate: candidatePDA1,
       poll: pollPDA,
-      voter: voter,
+      voter: {
+        address: voter.address
+      } as any,
       candidateName: candidate_name_1,
       pollId: poll_id
     })
 
-    await sendAndConfirm({ ix, payer })
+    const { value: latestBlockhash } = await rpc.getLatestBlockhash().send()
+    const tx = createTransaction({
+      feePayer: voter.address,
+      instructions: [ix],
+      version: 'legacy',
+      latestBlockhash,
+    })
 
+    const compiledTx = compileTransaction(tx)
+
+    const serializedTx = transactionToBase64(compiledTx)
+
+    const deserializedTx = transactionFromBase64(serializedTx)
+    
+
+    const signedTransaction = await signTransaction([voter.keyPair], compiledTx)
+
+    // Send and confirm the signed transaction
+    await sendAndConfirmTransaction(signedTransaction)
+    
     const candidateAccount = await fetchCandidate(rpc, candidatePDA1);
     expect(candidateAccount.data.voteCount).toEqual(1n);
   })

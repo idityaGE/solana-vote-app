@@ -109,6 +109,7 @@ pub struct InitializeCandidate<'info> {
 #[derive(Accounts)]
 #[instruction(_candidate_name: String, _poll_id: u64)]
 pub struct CastVote<'info> {
+    #[account(mut)]
     pub voter: Signer<'info>,
 
     #[account(
