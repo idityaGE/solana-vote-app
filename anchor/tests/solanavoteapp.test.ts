@@ -9,12 +9,14 @@ import {
   getProgramDerivedAddress,
   getU64Encoder,
   getUtf8Encoder,
+  generateKeyPairSigner,
 } from 'gill'
 import {
   getInitializePollInstructionAsync,
   SolanavoteappIDL,
   fetchPoll,
   getInitializeCandidateInstruction,
+  getCastVoteInstruction,
   fetchCandidate
 } from '../src'
 // @ts-ignore error TS2307 suggest setting `moduleResolution` but this is already configured
@@ -109,7 +111,20 @@ describe('solanavoteapp', () => {
   })
 
   it("Let's Cast Vote", async () => {
+    const voter = await generateKeyPairSigner();
 
+    const ix = getCastVoteInstruction({
+      candidate: candidatePDA1,
+      poll: pollPDA,
+      voter: voter,
+      candidateName: candidate_name_1,
+      pollId: poll_id
+    })
+
+    await sendAndConfirm({ ix, payer })
+
+    const candidateAccount = await fetchCandidate(rpc, candidatePDA1);
+    expect(candidateAccount.data.voteCount).toEqual(1n);
   })
 })
 
