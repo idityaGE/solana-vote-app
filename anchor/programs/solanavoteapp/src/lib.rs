@@ -1,3 +1,4 @@
+#![allow(unexpected_cfgs)]
 use anchor_lang::prelude::*;
 
 declare_id!("JAVuBXeBZqXNtS73azhBDAoYaaAFfo4gWXoZe2e7Jf8H");
@@ -97,7 +98,7 @@ pub struct InitializeCandidate<'info> {
         init,
         payer = signer,
         space = 8 + Candidate::INIT_SPACE,
-        seeds = [_poll_id.to_le_bytes().as_ref(), candidate_name.as_bytes()],
+        seeds = [_poll_id.to_le_bytes().as_ref(), candidate_name.as_ref()],
         bump
     )]
     pub candidate: Account<'info, Candidate>,
